@@ -1,0 +1,78 @@
+# Android / Gradle
+.gradle/
+build/
+**/build/
+out/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# APKs y paquetes compilados
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Archivos generados por Android
+local.properties
+.navigation/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# Configuración local del IDE
+workspace.xml
+tasks.xml
+usage.statistics.xml
+shelf/
+
+# Java
+*.class
+hs_err_pid*
+replay_pid*
+
+# Logs y archivos temporales
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Configuración local y secretos
+.env
+.env.*
+!.env.example
+
+# Claves y certificados privados
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+*.pem
+
+# Archivos de firma locales
+keystore.properties
+signing.properties
+
+# Pruebas y resultados locales
+
+test-results/
+reports/
+*.hprof
+
+
+# Otros
+# Copias de seguridad
+*.bak
+*.old
+*.orig
