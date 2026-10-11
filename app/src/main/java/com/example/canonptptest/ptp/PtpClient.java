@@ -464,6 +464,76 @@ public class PtpClient {
     return result;
   }
 
+  public synchronized PtpResponse recoverSession() throws Exception {
+    log("");
+    log("================================");
+    log("RECUPERACION DE SESION PTP");
+    log("================================");
+
+    if (connection == null || bulkIn == null || bulkOut == null) {
+      throw new Exception("No se puede recuperar PTP: la conexión USB no está disponible.");
+    }
+
+    if (!sessionOpen) {
+      throw new Exception(
+          "No se puede garantizar la recuperación: " + "la sesión PTP no figura como abierta.");
+    }
+
+    try {
+      // 1. Solicitar el cierre de la sesión actual.
+      transactionId++;
+      long closeTransaction = transactionId;
+
+      log("Paso 1: cerrando sesión anterior...");
+      log("Transaction ID: " + closeTransaction);
+
+      byte[] closeCommand = PtpContainer.buildCommand(OP_CLOSE_SESSION, closeTransaction);
+
+      sendBulkOut(closeCommand);
+
+      PtpContainer closeResponse = receiveContainer();
+
+      validateResponse(closeResponse, closeTransaction);
+
+      PtpResponse closeResult =
+          new PtpResponse(
+              closeResponse.getCode(),
+              closeResponse.getTransactionId(),
+              closeResponse.getParameters());
+
+      if (!closeResult.isSuccess()) {
+        throw new Exception("La cámara rechazó CloseSession: " + closeResult);
+      }
+
+      sessionOpen = false;
+
+      log("Sesión anterior cerrada correctamente.");
+
+      // 2. Abrir una nueva sesión.
+      log("Paso 2: abriendo nueva sesión PTP...");
+
+      PtpResponse openResult = openSession();
+
+      log("RECUPERACION PTP COMPLETADA");
+      log(openResult.toString());
+
+      return openResult;
+
+    } catch (Exception e) {
+      // No afirmar que la sesión sigue siendo válida.
+      sessionOpen = false;
+
+      log("RECUPERACION PTP FALLIDA");
+      log(e.getMessage() != null ? e.getMessage() : e.toString());
+
+      throw new Exception(
+          "No se pudo recuperar la sesión PTP de forma segura. "
+              + "La conexión USB podría seguir activa, pero el estado "
+              + "de la sesión es incierto.",
+          e);
+    }
+  }
+
   // CLOSE
   public synchronized void close() {
     try {

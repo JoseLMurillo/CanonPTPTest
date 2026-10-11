@@ -23,9 +23,6 @@ import com.example.canonptptest.usb.UsbPtpManager;
 import java.io.OutputStream;
 import java.util.List;
 
-import android.os.Environment;
-import java.util.Locale;
-
 public class MainActivity extends Activity {
   // UI
   private TextView statusText;
@@ -541,19 +538,40 @@ public class MainActivity extends Activity {
                   }
 
                 } catch (Exception e) {
-                  runOnUiThread(
-                      new Runnable() {
-                        @Override
-                        public void run() {
-                          log("");
-                          log("GET STORAGE IDs ERROR");
-                          log("Exception: " + e.getClass().getSimpleName());
-                          log("Message: " + e.getMessage());
-                          // delay(3000);
+                  log("");
+                  log("GET STORAGE IDs ERROR");
+                  log("Exception: " + e.getClass().getSimpleName());
+                  log("Message: " + (e.getMessage() != null ? e.getMessage() : e.toString()));
 
-                          setStatus("ERROR STORAGE IDs");
-                          storageIdsButton.setEnabled(true);
-                        }
+                  log("Intentando recuperar la sesión PTP...");
+
+                  boolean recovered = false;
+
+                  try {
+                    ptpClient.recoverSession();
+                    recovered = true;
+
+                    log("La sesión PTP se recuperó correctamente.");
+                    log("Puedes volver a intentar la operación.");
+
+                  } catch (Exception recoveryError) {
+                    log("No fue posible recuperar la sesión.");
+                    log(
+                        recoveryError.getMessage() != null
+                            ? recoveryError.getMessage()
+                            : recoveryError.toString());
+                  }
+
+                  final boolean sessionRecovered = recovered;
+
+                  runOnUiThread(
+                      () -> {
+                        setStatus(
+                            sessionRecovered
+                                ? "SESION RECUPERADA. INTENTA DE NUEVO"
+                                : "ERROR PTP. REVISA EL LOG");
+
+                        storageIdsButton.setEnabled(true);
                       });
                 }
               }
